@@ -5,7 +5,7 @@ const searchInput = document.getElementById("search");
 const notesContainer = document.getElementById("notesContainer");
 
 let notes = JSON.parse(localStorage.getItem("notes")) || [];
-
+let editingId = null;
 renderNotes();
 
 addBtn.addEventListener("click", addNote);
@@ -24,15 +24,30 @@ function addNote() {
         return;
     }
 
-    notes.push({
-        id: Date.now(),
-        title,
-        content
-    });
+    if (editingId !== null) {
+
+        const note = notes.find(n => n.id === editingId);
+
+        note.title = title;
+        note.content = content;
+
+        editingId = null;
+
+        addBtn.textContent = "Add Note";
+
+    } else {
+
+        notes.push({
+            id: Date.now(),
+            title,
+            content
+        });
+
+    }
 
     saveNotes();
 
-    renderNotes();
+    renderNotes(searchInput.value);
 
     titleInput.value = "";
     contentInput.value = "";
@@ -66,21 +81,14 @@ function renderNotes(search = "") {
 
         noteCard.querySelector(".edit-btn").addEventListener("click", () => {
 
-            const newTitle = prompt("Edit title:", note.title);
+    titleInput.value = note.title;
+    contentInput.value = note.content;
 
-            if (newTitle === null) return;
+    editingId = note.id;
 
-            const newContent = prompt("Edit content:", note.content);
+    addBtn.textContent = "Update Note";
 
-            if (newContent === null) return;
-
-            note.title = newTitle.trim();
-            note.content = newContent.trim();
-
-            saveNotes();
-            renderNotes(searchInput.value);
-
-        });
+});
 
         noteCard.querySelector(".delete-btn").addEventListener("click", () => {
 
